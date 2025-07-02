@@ -1,0 +1,355 @@
+===============================================================================
+                    PROJETO PAC-MAN - ORIENTADO A OBJETOS
+                            DIAGRAMA DE CLASSES E DOCUMENTAÇÃO
+===============================================================================
+
+VISÃO GERAL DO PROJETO:
+Este projeto implementa um jogo Pac-Man completo em Python usando Pygame, seguindo 
+princípios de orientação a objetos. O jogo inclui sistema de campanha com múltiplos
+mapas, inteligência artificial dos fantasmas com algoritmo A*, gerenciamento de
+sprites e sons, além de sistema de pontuação.
+
+===============================================================================
+                              CLASSES PRINCIPAIS
+===============================================================================
+
+1. CLASSE ABSTRATA: GameObject
+   - Classe base para todos os objetos do jogo
+   
+   ATRIBUTOS:
+   - _position: Vector2D - Posição do objeto no mundo
+   - _color: tuple - Cor do objeto
+   - _size: int - Tamanho do objeto
+   - _animation_frame: int - Frame atual da animação
+   
+   MÉTODOS ABSTRATOS:
+   - draw(screen): Desenha o objeto na tela
+   - update(delta_time): Atualiza o estado do objeto
+   
+   MÉTODOS CONCRETOS:
+   - __init__(x, y, color, size): Inicializa objeto com posição e propriedades
+   - position (property): Getter/setter para posição
+   - color (property): Getter para cor
+   - size (property): Getter para tamanho
+   - get_rect(): Retorna retângulo para detecção de colisão
+
+2. CLASSE: MovableObject (herda de GameObject)
+   - Classe base para objetos que podem se mover
+   
+   ATRIBUTOS:
+   - _speed: float - Velocidade de movimento
+   - _direction: Direction - Direção atual do movimento
+   - _next_direction: Direction - Próxima direção desejada
+   
+   MÉTODOS:
+   - __init__(x, y, color, size, speed, direction): Inicializa objeto móvel
+   - speed (property): Getter/setter para velocidade
+   - direction (property): Getter/setter para direção
+   - can_move(direction, game_map, entity_type): Verifica se pode mover na direção
+   - move(direction): Move o objeto na direção especificada
+
+3. CLASSE: Player (herda de MovableObject)
+   - Representa o jogador (Pac-Man)
+   
+   ATRIBUTOS:
+   - _lives: int - Número de vidas restantes
+   - _score: int - Pontuação atual
+   - _power_up_active: bool - Se power-up está ativo
+   - _power_up_timer: int - Timer do power-up
+   
+   MÉTODOS:
+   - __init__(x, y, color, size, speed, lives, score): Inicializa jogador
+   - lives (property): Getter para vidas
+   - score (property): Getter para pontuação
+   - power_up_active (property): Getter/setter para status do power-up
+   - eat_pellet(pellet_value): Adiciona pontos ao comer pellet
+   - activate_power_up(): Ativa poder especial
+   - lose_life(): Remove uma vida
+   - draw(screen): Desenha Pac-Man com sprites animados
+   - update(delta_time, game_map): Atualiza estado do jogador
+
+4. CLASSE: Ghost (herda de MovableObject)
+   - Representa os fantasmas inimigos
+   
+   ATRIBUTOS:
+   - _state: str - Estado atual ("normal", "vulnerable", "eaten")
+   - _ghost_type: str - Tipo do fantasma ("red", "pink", "cyan", "orange")
+   - _initial_position: Vector2D - Posição inicial de spawn
+   - _current_mode: str - Modo atual ("patrol", "chase")
+   - _difficulty_multiplier: float - Multiplicador de dificuldade
+   - _patrol_route: list - Rota de patrulhamento
+   - _current_path: list - Caminho atual calculado pelo A*
+   
+   MÉTODOS PRINCIPAIS:
+   - __init__(x, y, color, size, speed, initial_position, ghost_type): Inicializa fantasma
+   - set_difficulty(difficulty_level): Define dificuldade baseada no mapa
+   - set_vulnerable(duration): Torna fantasma vulnerável
+   - get_target_position(player_position, player_direction, other_ghosts): Calcula posição alvo
+   - choose_direction_advanced(game_map, target_position): Escolhe direção com IA avançada
+   - astar_pathfinding(game_map, target_position): Usa algoritmo A* para navegação
+   - update_mode(delta_time): Alterna entre modos patrol e chase
+   - reset_position(): Reseta posição para spawn inicial
+   - set_eaten_with_delay(): Coloca fantasma no spawn com delay após ser comido
+   - draw(screen): Desenha fantasma com sprites animados
+   - update(delta_time, player_position, player_direction, game_map, other_ghosts): Atualiza IA
+
+5. CLASSE: Pellet (herda de GameObject)
+   - Representa pontos coletáveis no mapa
+   
+   ATRIBUTOS:
+   - _type: str - Tipo do pellet ("normal", "power_up")
+   - _value: int - Valor em pontos
+   
+   MÉTODOS:
+   - __init__(x, y, color, size, pellet_type, value): Inicializa pellet
+   - type (property): Getter para tipo
+   - value (property): Getter para valor
+   - be_eaten(): Retorna valor quando comido
+   - draw(screen): Desenha pellet com sprite
+   - update(delta_time): Atualiza animação
+
+6. CLASSE: Map
+   - Gerencia o mapa do jogo e colisões
+   
+   ATRIBUTOS:
+   - _layout: list - Layout do mapa (matriz 2D)
+   - _cell_size: int - Tamanho das células
+   - _width, _height: int - Dimensões do mapa
+   - _metadata: dict - Metadados do mapa (nome, dificuldade, etc.)
+   - _spawn_positions: dict - Posições de spawn das entidades
+   
+   MÉTODOS PRINCIPAIS:
+   - __init__(layout_data, cell_size, map_file_path): Inicializa mapa
+   - load_from_json(file_path): Carrega mapa de arquivo JSON
+   - get_available_maps(): Retorna lista de mapas disponíveis (método estático)
+   - load_default_map(): Carrega mapa padrão como fallback
+   - get_pellets(): Retorna lista de pellets baseada no layout
+   - get_spawn_position(entity_type): Retorna posição de spawn para entidade
+   - is_wall(position): Verifica se posição é parede
+   - is_valid_position(position, object_size, type): Verifica se posição é válida
+   - remove_pellet_at(position): Remove pellet na posição
+   - count_pellets(): Conta pellets restantes
+   - reset_map(): Reseta mapa para estado inicial
+   - draw(screen): Desenha mapa na tela
+
+7. CLASSE: SpriteManager
+   - Gerencia todos os sprites do jogo
+   
+   ATRIBUTOS:
+   - _sprites: dict - Dicionário com todos os sprites carregados
+   - _sprite_size: int - Tamanho padrão dos sprites (16px)
+   
+   MÉTODOS:
+   - __init__(): Inicializa gerenciador e carrega sprites
+   - _load_sprite(path): Carrega sprite individual de arquivo
+   - _create_default_sprite(): Cria sprite padrão quando original não encontrado
+   - _load_all_sprites(): Carrega todos os sprites das pastas
+   - get_pacman_sprite(direction, animation_frame): Retorna sprite do Pac-Man
+   - get_ghost_sprite(ghost_type, direction, animation_frame, state): Retorna sprite do fantasma
+   - get_pellet_sprite(pellet_type, animation_frame): Retorna sprite do pellet
+   - sprite_size (property): Getter para tamanho dos sprites
+
+8. CLASSE: SoundManager
+   - Gerencia sistema de áudio do jogo
+   
+   ATRIBUTOS:
+   - _sounds: dict - Dicionário com sons carregados
+   - _volumes: dict - Volumes por tipo de som
+   - _sound_types: dict - Mapeamento de sons para tipos
+   - _last_play_times: dict - Controle de sobreposição de sons
+   
+   MÉTODOS PRINCIPAIS:
+   - __init__(): Inicializa sistema de áudio
+   - _initialize_channels(): Configura canais específicos
+   - _load_all_sounds(): Carrega todos os sons da pasta assets
+   - play_sound(sound_name, volume): Reproduz som específico
+   - stop_sound(sound_name): Para reprodução de som
+   - set_volume(sound_type, volume): Define volume por tipo
+   - pause_all_sounds(): Pausa todos os sons
+   - unpause_all_sounds(): Despausa todos os sons
+   - stop_all_sounds(): Para todos os sons
+
+9. CLASSE: Game
+   - Classe principal que coordena todo o jogo
+   
+   ATRIBUTOS PRINCIPAIS:
+   - _state: GameState - Estado atual do jogo
+   - _screen: pygame.Surface - Superfície de desenho
+   - _map: Map - Instância do mapa atual
+   - _player: Player - Instância do jogador
+   - _ghosts: list - Lista de fantasmas
+   - _pellets: list - Lista de pellets
+   - _available_maps: list - Mapas disponíveis na campanha
+   - _current_map_index: int - Índice do mapa atual
+   - _campaign_total_score: int - Pontuação total da campanha
+   
+   MÉTODOS PRINCIPAIS:
+   - __init__(width, height): Inicializa jogo e componentes
+   - _initialize_sound_system(): Configura sistema de áudio
+   - _initialize_campaign(): Carrega mapas da campanha
+   - _initialize_game(): Inicializa objetos do jogo
+   - _reset_game(): Reinicia jogo completamente
+   - process_events(): Processa entrada do usuário
+   - update(delta_time): Atualiza lógica do jogo
+   - render(): Renderiza elementos na tela
+   - _draw_hud(): Desenha interface do usuário
+   - run(): Loop principal do jogo
+
+10. CLASSE: HighScoreManager
+    - Gerencia sistema de pontuações
+    
+    ATRIBUTOS:
+    - filename: str - Nome do arquivo de pontuações
+    - highscores: list - Lista de pontuações
+    
+    MÉTODOS:
+    - __init__(filename): Inicializa gerenciador
+    - load_highscores(): Carrega pontuações do arquivo
+    - save_highscores(): Salva pontuações no arquivo
+    - add_score(name, score): Adiciona nova pontuação
+
+===============================================================================
+                              CLASSES UTILITÁRIAS
+===============================================================================
+
+11. CLASSE: Vector2D
+    - Representa vetores 2D para posições e cálculos
+    
+    MÉTODOS:
+    - __init__(x, y): Inicializa vetor
+    - __add__, __sub__, __mul__: Operações matemáticas
+    - magnitude(): Calcula magnitude do vetor
+    - normalize(): Retorna vetor unitário
+    - distance_to(other): Calcula distância euclidiana
+    - manhattan_distance_to(other): Calcula distância Manhattan
+
+12. CLASSE: AStar
+    - Implementa algoritmo A* para pathfinding
+    
+    MÉTODOS ESTÁTICOS:
+    - heuristic(pos1, pos2, heuristic_type): Calcula heurística
+    - get_neighbors(position, cell_size): Retorna posições vizinhas
+    - find_path(start, goal, game_map, heuristic_type): Encontra caminho
+    - reconstruct_path(node): Reconstrói caminho a partir do nó final
+
+13. CLASSE: AStarNode
+    - Representa nó no algoritmo A*
+    
+    ATRIBUTOS:
+    - position: Vector2D - Posição do nó
+    - g_cost: float - Custo real do início
+    - h_cost: float - Heurística até objetivo
+    - f_cost: float - Custo total
+    - parent: AStarNode - Nó pai
+
+14. ENUMS:
+    - Direction: UP, DOWN, LEFT, RIGHT, NONE
+    - GameState: MENU, PLAYING, GAME_OVER, PAUSED, VICTORY, OPTIONS, HISTORY, INTERMISSION
+    - SoundType: EFFECT, MUSIC, UI, GHOST
+
+===============================================================================
+                          FUNCIONALIDADES PRINCIPAIS
+===============================================================================
+
+1. SISTEMA DE CAMPANHA:
+   - Múltiplos mapas com diferentes dificuldades (0-200)
+   - Progressão automática entre mapas
+   - Pontuação cumulativa na campanha
+   - Tela de intermissão entre mapas
+
+2. INTELIGÊNCIA ARTIFICIAL DOS FANTASMAS:
+   - 4 tipos com comportamentos únicos (red, pink, cyan, orange)
+   - Algoritmo A* para pathfinding inteligente
+   - Sistema de patrulhamento orgânico
+   - Ajuste de dificuldade baseado no mapa
+   - Modos alternados: patrol e chase
+
+3. SISTEMA DE SPRITES:
+   - Sprites animados para todos os personagens
+   - Carregamento automático de arquivos de imagem
+   - Fallback para sprites padrão se arquivo não encontrado
+   - Diferentes sprites para diferentes estados
+
+4. SISTEMA DE SOM:
+   - Múltiplos tipos de som com volumes independentes
+   - Prevenção de sobreposição indesejada
+   - Canais específicos para diferentes categorias
+   - Pause/unpause global e individual
+
+5. SISTEMA DE MAPAS:
+   - Carregamento de mapas JSON
+   - Metadados incluindo nome, dificuldade, descrição
+   - Posições de spawn configuráveis
+   - Sistema de colisão preciso
+
+6. INTERFACE E MENUS:
+   - Menu principal interativo
+   - Tela de opções com controle de volumes
+   - Histórico de pontuações
+   - HUD informativo durante o jogo
+   - Telas de vitória e game over
+
+===============================================================================
+                                FLUXO DO JOGO
+===============================================================================
+
+1. INICIALIZAÇÃO:
+   Game.__init__() → carrega mapas → inicializa componentes → estado MENU
+
+2. MENU PRINCIPAL:
+   Navegação por opções → seleção inicia jogo → _reset_game() → estado PLAYING
+
+3. GAMEPLAY:
+   Loop: process_events() → update() → render()
+   - Player movement e colisões
+   - Ghost AI e pathfinding
+   - Coleta de pellets
+   - Verificação de condições de vitória/derrota
+
+4. TRANSIÇÕES:
+   - Mapa completo → INTERMISSION → próximo mapa
+   - Última vida perdida → GAME_OVER
+   - Campanha completa → VICTORY
+
+5. FINALIZAÇÃO:
+   Entrada de nome → salvamento de pontuação → retorno ao MENU
+
+===============================================================================
+                              ARQUITETURA TÉCNICA
+===============================================================================
+
+PADRÕES UTILIZADOS:
+- Strategy Pattern: Diferentes comportamentos de fantasmas
+- State Pattern: Estados do jogo e dos fantasmas
+- Singleton Pattern: SpriteManager e SoundManager globais
+- Template Method: GameObject como classe base abstrata
+- Observer Pattern: Sistema de eventos do Pygame
+
+PRINCÍPIOS OO APLICADOS:
+- Encapsulamento: Atributos privados com getters/setters
+- Herança: Hierarquia GameObject → MovableObject → Player/Ghost
+- Polimorfismo: Métodos draw() e update() implementados diferentemente
+- Abstração: Classes abstratas e interfaces claras
+
+ESTRUTURA DE ARQUIVOS:
+- main.py: Ponto de entrada e classe Game principal
+- src/game_objects.py: Classes dos objetos do jogo
+- src/map.py: Gerenciamento de mapas
+- src/sprite_manager.py: Gerenciamento de sprites
+- src/sound_manager.py: Gerenciamento de áudio
+- src/utils.py: Classes utilitárias e enums
+- assets/: Recursos (sprites, sons, mapas)
+
+===============================================================================
+                                  RESUMO
+===============================================================================
+
+Este projeto demonstra uma implementação completa e robusta de um jogo Pac-Man
+usando princípios sólidos de orientação a objetos. A arquitetura é modular,
+extensível e mantém separação clara de responsabilidades entre as classes.
+
+O sistema de campanha com múltiplos mapas, IA avançada dos fantasmas com A*,
+e gerenciamento completo de recursos (sprites/sons) fazem deste um exemplo
+abrangente de desenvolvimento de jogos em Python com Pygame.
+
+=============================================================================== 
