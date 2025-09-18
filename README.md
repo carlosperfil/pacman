@@ -9,8 +9,6 @@
 
 **🎯 Um jogo Pac-Man completo implementado em Python com arquitetura orientada a objetos avançada**
 
-[![Play Demo](https://img.shields.io/badge/▶️-Play_Demo-red?style=for-the-badge&logo=python)](https://github.com/seu-usuario/Projeto-OO-pacman)
-
 </div>
 
 ---
@@ -182,9 +180,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 <div align="center">
 
 ### ⭐ Se este projeto te ajudou, considere dar uma estrela!
-
-[![GitHub stars](https://img.shields.io/github/stars/seu-usuario/Projeto-OO-pacman?style=social)](https://github.com/seu-usuario/Projeto-OO-pacman)
-[![GitHub forks](https://img.shields.io/github/forks/seu-usuario/Projeto-OO-pacman?style=social)](https://github.com/seu-usuario/Projeto-OO-pacman)
 
 **🎮 Divirta-se jogando!**
 
