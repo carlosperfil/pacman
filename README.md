@@ -179,12 +179,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ---
 
-## 👨‍💻 Autor
-
-**Seu Nome** - [GitHub](https://github.com/seu-usuario)
-
----
-
 <div align="center">
 
 ### ⭐ Se este projeto te ajudou, considere dar uma estrela!
