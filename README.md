@@ -28,7 +28,7 @@
 
 ```bash
 # Clone o repositório
-git clone https://github.com/carlosperfil/Projeto-OO-pacman.git
+git clone https://github.com/carlosperfil/pacman.git
 cd Projeto-OO-pacman
 
 # Instale as dependências
